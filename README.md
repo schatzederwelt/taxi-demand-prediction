@@ -28,115 +28,64 @@
 ## Новые навыки 
 
 <div class="alert alert-success">
-<br> ✔️ Анализ текста NLP   ✔️ TF-IDF  ✔️ Токенизация </br>
-<br> ✔️ Стемминг      ✔️ Лемматизация      ✔️ Частотный анализ слов </br>
-<br> ✔️ Chi-square тест для ключевых слов  ✔️ Визуализация предсказаний LIME </br>
-<br> ✔️ Регулярные выражения    ✔️ WordCloud </br>
-<br> ✔️ Библиотека imblearn для Oversampling & Downsampling </br>
-<br> ✔️ Регуляризация LinearRegression</br> 
+<br> ✔️ Анализ и дифференцирование временных рядов   ✔️ Upsampling  </br>
+<br> ✔️ Исследование стационарности  ✔️ Тест Дики — Фуллера </br>
+<br> ✔️ Автокорреляция и визуализация ACF& PACF ✔️ Сезонная декомпозиция </br>
+<br> ✔️ Генерация календарных и lag-признаков  ✔️ rolling-window признаки</br>
+<br> ✔️ Модель XGBoost </br>
 </div>
 
 ## Этапы исследования
 
-1.  Провели `предобработку текста` в комментариях:
+Для достижения цели мы воспользовались разными подходами:
 
-    -  очистка от ссылок и символов (использовали регулярные выражения)
-    -  лемматизация с WordNetLemmatizer
-    -  стемминг c PorterStemmer
+1. Провели детальный анализ **динамики заказов** и `сезонности`
+
+2. Исследовали **стационарность** временного ряда:
+
+   - Тест Дики-Фуллера
+   - Сэмплирование и дифференцирование
+   - Поиск закономерностей с помощью **автокорреляции** `ACF`
+
+2. Сгенерировали **признаки 3-х типов** для SupervisedLearning:
+    - Лаги
+    - Календарные признаки
+    - "Скользящие" статистики (rolling-window)
     
-2. С помощью **WordCloud** нашли ключевые слова в `негативных комментариях`
+3. Для **отбора признаков** использовали:
+   - Статистические графики с **автокорреляцией** `PACF` и `ACF`
+   - `FeatureImportance` Линейной Регрессии и XGBoost
 
-3. Сделали первые эксперименты для улучшения результатов базовой **линейной модели**:
+4. Провели анализ ошибок и **выявили аномалии**, что позволило `улучшить результаты`.
 
-    -  Выбрали `стемминг` вместо лемматизации
-    -  Улучшили модель фильтрацией **редких слов** с помощью FreqDist
-    -  Подобрали параметры для TFidfVectorizer - `min_df` и `max_features`
-    -  Сделали тюнинг **регуляризации** для Линейной Регрессии
-    
-4.  Провели детальное исследование **частотности слов**:
+5. **Визуализировали** предсказания для `оценки качества` построенной модели
 
-    - Выявили высокочастотные слова в TF-IDF (для сокращения признаков и улучшения качества предсказаний)
-    - Придумали подход для поиска `уникальных` слов в негативных и позитивных комментариях 
-  
-5. Отобрали лучшие признаки-токены с помощью **Chi-square** теста
-6. Для проблемы с дисбалансом использовали **Undersampling** библиотеки imblearn
-
-На последнем этапе мы интерпретировали предсказания и сделали визуализацию LIME для оценки слабых сторон модели
+Также познакомились с возможностями **XGBoost**, который в текущем проекте показал большую **устойчивость** к `overfitting`, чем RandomForest.
 
 ## Результат проекта
 
-Мы построили **линейную модель** предсказания токсичности комментариев и выполнили **KPI** `F1 score > 0.75`.
+Мы успешно построили `forecasting` модель для предсказания **спроса на такси** в ближайший час.
 
-- С помощью `Feature Engineering` и **балансировки классов** мы достигли **f1-score = 0.82**  на тесте
+Лучшие результаты на всех этапах показала **Линейная Регрессия**:
 
-- **Recall** предсказаний негативного (токсичного) класса вырос с `0.63 до 0.8` 
+==> Кросс-валидация
 
-- Для обучения использовали всего `850 признаков`-слов.
+- RMSE:  24.06 | MAE :  18.63 - обучающий датасет
 
-<div>
-<table border="1" class="dataframe">
-  <thead>
-    <tr style="text-align: right;">
-      <th></th>
-      <th>леммы</th>
-      <th>стемминг</th>
-      <th>voc_freq &gt; 100</th>
-      <th>max_features = 3000</th>
-      <th>C_parameter = 5</th>
-      <th>L1_reg</th>
-      <th>chi2_p_1</th>
-      <th>50_tokens</th>
-      <th>under_sampling</th>
-      <th>TEST</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <th>f1-score</th>
-      <td>0.742784</td>
-      <td>0.748111</td>
-      <td>0.757072</td>
-      <td>0.758621</td>
-      <td>0.777382</td>
-      <td>0.784375</td>
-      <td>0.793117</td>
-      <td>0.812384</td>
-      <td>0.811304</td>
-      <td>0.822401</td>
-    </tr>
-    <tr>
-      <th>recall</th>
-      <td>0.623219</td>
-      <td>0.634615</td>
-      <td>0.648148</td>
-      <td>0.650285</td>
-      <td>0.700142</td>
-      <td>0.715100</td>
-      <td>0.722222</td>
-      <td>0.744285</td>
-      <td>0.790008</td>
-      <td>0.803598</td>
-    </tr>
-    <tr>
-      <th>precision</th>
-      <td>0.919118</td>
-      <td>0.911043</td>
-      <td>0.910000</td>
-      <td>0.910269</td>
-      <td>0.873778</td>
-      <td>0.868512</td>
-      <td>0.879445</td>
-      <td>0.894201</td>
-      <td>0.833780</td>
-      <td>0.842105</td>
-    </tr>
-  </tbody>
-</table>
-</div>
+- RMSE:  31.01 | MAE :  24.08 - валидационная выборка
 
-Качество предсказаний можно улучшить, если провести еще более **глубокий анализ текстов**, а также воспользоваться `новыми идеями`, которые возникли за время проекта:
-- "*ucking" слова-  100% индикаторы негативных комментариев
-- Текст КРУПНЫМИ буквами, много восклицательных знаков (!!!) - негативные эмоции 
+==> Тест
+
+- RMSE:  24.87 | MAE :  19.22 - обучающий датасет
+
+- **RMSE:  36.41 | MAE :  29.04 - тестовая выборка**
+
+Поставленный KPI с `RMS <= 48` достигнут! 
+
+**Возможности для развития проекта:**
+
+- Добавить в качестве признаков результаты `дифференцирования`
+- Использовать для предсказаний готовые модели, например, **fbpropet**
 
 ## Исходные данные
 
@@ -148,44 +97,39 @@ df = pd.read_csv("/datasets/toxic_comments.csv")
 
 df.sample(5)
 ```
-
-
-<div>
-
 <table border="1" class="dataframe">
   <thead>
     <tr style="text-align: right;">
       <th></th>
-      <th>text</th>
-      <th>toxic</th>
+      <th>datetime</th>
+      <th>num_orders</th>
     </tr>
   </thead>
   <tbody>
     <tr>
-      <th>44661</th>
-      <td>There is only one way to settle this dilemma, we vote for the color of the infobox, Oakland Athletics or New York Yankees.  Having A's colors on Reggie Jackson's page is the most worst thing ever.  Everyone remembers Reggie as a Yankee, the three homeruns in the world series, the argument with Billy Martin, etc.  Reggie had his greatest success as a Yankee.  And lets face it nobody likes the Oakland A's #9 Reggie Jackson but everbody loves the New York Yankees #44 Reggie Jackson.  Reggie wil...</td>
-      <td>0</td>
+      <th>13640</th>
+      <td>2018-06-03 17:20:00</td>
+      <td>11</td>
     </tr>
     <tr>
-      <th>52006</th>
-      <td>Comment on the question about including separate sections for health, environmental, and economic damage.  I don't feel that it is appropriate for this article about BP to include these sections.  I believe that the editors that have argued for including these sections have presented their arguments very well, but it could also be argued that including such a brief summary (as must be) in one sense tends to minimize the issues.  But mainly, the information just seems out of place in this art...</td>
-      <td>0</td>
+      <th>167</th>
+      <td>2018-03-02 03:50:00</td>
+      <td>21</td>
     </tr>
     <tr>
-      <th>9770</th>
-      <td>Reworked to something verifiable.</td>
-      <td>0</td>
+      <th>24054</th>
+      <td>2018-08-15 01:00:00</td>
+      <td>51</td>
     </tr>
     <tr>
-      <th>127777</th>
-      <td>disruption \n\ni am not disrupting it YOU ARE \n\nI have to warn that Richhno to stay away from my project, Vanity Kills. \n\nPlease do not bother me (or any other team member) with this crap again.</td>
-      <td>1</td>
+      <th>8732</th>
+      <td>2018-04-30 15:20:00</td>
+      <td>9</td>
     </tr>
     <tr>
-      <th>142387</th>
-      <td>"\n\nThe sources given for monarchs seems to give a finite number to them, so no, they do not have infinite wealth. Many monarchs never had their wealth valued, but those that did shoudl be here, this is the lsit for them afterall and they are not knocking anyone off by appearing. [tk]  "</td>
-      <td>0</td>
+      <th>24587</th>
+      <td>2018-08-18 17:50:00</td>
+      <td>11</td>
     </tr>
   </tbody>
 </table>
-</div>
