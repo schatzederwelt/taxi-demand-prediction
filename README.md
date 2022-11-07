@@ -1,6 +1,6 @@
 # Прогнозирование спроса на такси
 
-![comments_nlp](https://www.traveller.com.au/content/dam/images/h/0/q/y/v/d/image.related.articleLeadwide.620x349.h0qylt.png/1517386967950.jpg)
+#![comments_nlp](https://www.traveller.com.au/content/dam/images/h/0/q/y/v/d/image.related.articleLeadwide.620x349.h0qylt.png/1517386967950.jpg)
 
 ## Описание проекта
 
